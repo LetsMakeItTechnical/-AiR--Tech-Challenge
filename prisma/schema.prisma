@@ -1,0 +1,43 @@
+// schema.prisma
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+generator docs {
+  provider = "node node_modules/prisma-docs-generator"
+  output   = "../docs"
+}
+
+model Song {
+  id         Int          @id @default(autoincrement())
+  title      String
+  url        String // URL field pointing to external storage
+  artists    Artist[]     @relation("SongToArtist")
+  updatedAt  DateTime     @updatedAt
+  createdAt  DateTime     @default(now())
+  SongArtist SongArtist[]
+}
+
+model Artist {
+  id         Int          @id @default(autoincrement())
+  name       String
+  songs      Song[]       @relation("SongToArtist")
+  updatedAt  DateTime     @updatedAt
+  createdAt  DateTime     @default(now())
+  SongArtist SongArtist[]
+}
+
+model SongArtist {
+  song     Song   @relation(fields: [songId], references: [id])
+  songId   Int
+  artist   Artist @relation(fields: [artistId], references: [id])
+  artistId Int
+
+  @@id([songId, artistId])
+}
